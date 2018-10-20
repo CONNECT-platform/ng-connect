@@ -4,6 +4,7 @@ import { map } from 'rxjs/operators';
 import { EventEmitter } from '@angular/core';
 
 import { Signature } from './signature';
+import { Response } from './response';
 
 
 export class ConnectBackend {
@@ -23,7 +24,7 @@ export class ConnectBackend {
     return this._onConnected;
   }
 
-  call(path, inputs?): Observable<any> {
+  call(path, inputs?): Response {
     let signature = this.registry[path];
     if (signature) {
       let method = signature.method;
@@ -38,26 +39,10 @@ export class ConnectBackend {
             break;
       }
 
-      return request.pipe(map(response => this.process(response, signature)));
+      return new Response(request, signature);
     }
     else
       throw new Error(`no path ${path} on CONNECT instance @ ${this.uri}`);
-  }
-
-  public process(response:any, signature: Signature):any {
-    let result;
-
-    if (signature.outputs) {
-      let keys = Object.keys(response);
-      keys.forEach(key => {
-        if (signature.outputs.includes(key)) {
-          result = response[key];
-          return;
-        }
-      });
-    }
-
-    return result;
   }
 
   get onConnected(): EventEmitter<void> { return this._onConnected; }
