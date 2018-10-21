@@ -16,9 +16,10 @@ export class AppComponent {
     this.backend = connectService.createBackend('http://localhost:4000');
 
     this.backend.connect().subscribe(() => {
-      let r = this.backend.call('/test-ng/');
-      r.out.o1.subscribe(val => console.log(val));
-      r.out.o2.subscribe(val => console.log('ASS'));
+      let r = this.backend.call('/factoriel/', {
+        number: 8,
+      });
+      r.out.factoriel.subscribe(val => console.log(val));
     });
   }
 }

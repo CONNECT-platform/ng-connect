@@ -29,13 +29,30 @@ export class ConnectBackend {
     if (signature) {
       let method = signature.method;
       let request: Observable<any>;
+
+      if (signature.inputs)
+        signature.inputs.forEach(input => {
+          if (!inputs || !(input in inputs))
+            throw new Error(`missing input: ${input}`);
+        });
+
       switch(method) {
         case 'DELETE':
-          request = this.http.delete<any>(this.uri + signature.path);
+          request = this.http.delete(this.uri + signature.path, {
+            params: inputs || {},
+          });
+          break;
+        case 'POST':
+          request = this.http.post(this.uri + signature.path, inputs || {});
+          break;
+        case 'PUT':
+          request = this.http.put(this.uri + signature.path, inputs || {});
           break;
         case 'GET':
         default:
-            request = this.http.get<any>(this.uri + signature.path);
+            request = this.http.get(this.uri + signature.path, {
+              params: inputs || {},
+            });
             break;
       }
 
