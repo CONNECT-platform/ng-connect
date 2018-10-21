@@ -11,7 +11,7 @@ export class NgConnectService {
 
   constructor(private http: HttpClient) {}
 
-  createBackend(uri): ConnectBackend {
+  createBackend(uri:string): ConnectBackend {
     return new ConnectBackend(uri, this.http);
   }
 }

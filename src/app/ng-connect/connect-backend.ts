@@ -24,7 +24,7 @@ export class ConnectBackend {
     return this._onConnected;
   }
 
-  call(path, inputs?): Response {
+  call(path: string, inputs?: {[input:string]: any}): Response {
     let signature = this.registry[path];
     if (signature) {
       let method = signature.method;
