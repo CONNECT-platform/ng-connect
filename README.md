@@ -16,8 +16,7 @@ Import the module `NgConnectModule` and the service `NgConnectService` in your m
 add `NgConnectModule` to `@NgModule`'s `imports` field and `NgConnectService` to its `providers` field:
 
 ```typescript
-import { NgConnectModule } from 'ng-connect/ng-connect.module';
-import { NgConnectService } from 'ng-connect/ng-connect.service';
+import { NgConnectModule, NgConnectService } from 'ng-connect';
 
 @NgModule({
 
@@ -44,8 +43,7 @@ export class AppModule { /* ... */ }
 You need to create one backend instance per backend service you want to connect to. I would personally suggest creating a service that manages these backend instances, however you can create them wherever you have access to DI.
 
 ```typescript
-import { NgConnectService } from './ng-connect/ng-connect.service';
-import { ConnectBackend } from './ng-connect/connect-backend';
+import { NgConnectService, ConnectBackend } from 'ng-connect';
 
 class SomeDIInitiatedClass {
   private backend: ConnectBackend;
