@@ -1,27 +1,90 @@
 # NgConnect
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.0.8.
+Easy interface with CONNECT platform instances. 
 
-## Development server
+_I mean, its generally not tough to interface with backend services in angular, and CONNECT platform instances are also pretty straight-forward. However, I am personally the lazy type, and since the signature of CONNECT instances is known before hand and is pretty easy to handle, this would make it easier on the client side to speak with them. Note that of course this package can work with any **InterConnectible** service._
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## How To Install
 
-## Code scaffolding
+```bash
+npm install ng-connect
+```
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## How To Import
 
-## Build
+Import the module `NgConnectModule` and the service `NgConnectService` in your main module file (`app.module.ts`),
+add `NgConnectModule` to `@NgModule`'s `imports` field and `NgConnectService` to its `providers` field:
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+```typescript
+import { NgConnectModule } from 'ng-connect/ng-connect.module';
+import { NgConnectService } from 'ng-connect/ng-connect.service';
 
-## Running unit tests
+@NgModule({
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+  /* ... */
+  
+  imports: [
+    /* ... */
+    NgConnectModule,
+  ],
+  providers: [
+    /* ... */
+    NgConnectService,
+  ],
+  
+  /* ... */
+  
+})
+export class AppModule { /* ... */ }
 
-## Running end-to-end tests
+```
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+## How To Use
 
-## Further help
+You need to create one backend instance per backend service you want to connect to. I would personally suggest creating a service that manages these backend instances, however you can create them wherever you have access to DI.
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+```typescript
+import { NgConnectService } from './ng-connect/ng-connect.service';
+import { ConnectBackend } from './ng-connect/connect-backend';
+
+class SomeDIInitiatedClass {
+  private backend: ConnectBackend;
+
+  constructor(connect: NgConnectService) {
+    this.backend = connect.createBackend('https://my-connect-backend.connect-platform.com');
+    
+    //
+    // the backend does not connect itself, to give you control over when to connect it.
+    //
+    this.backend.connect().subscribe(() => console.log('CONNECTED!'));    
+  }
+}
+```
+
+Then you can make calls to backend nodes easily:
+
+```typescript
+let response = this.backend.call('/some/node/', { 
+  a: 'some value',
+  b: 'some other value',
+ });
+ 
+response.out.X.subscribe(outX => console.log('X:: ' + outX));
+response.out.Y.subscribe(outY => console.log('Y:: ' + outY));
+response.control.Z.subscribe(() => console.log('Z!'));
+```
+
+this is assuming that `/some/node/` has the following signature:
+
+```json
+{
+  "path" : "/some/node",
+  "inputs" : ["a", "b"],
+  "outputs" : ["X", "Y"],
+  "controlOutputs" : ["Z"]
+}
+```
+
+the backend will receive the whole registry signature upon connection (invokation of `connect()`), and hence will automatically figure out the proper method of the request, the proper way to send the data, etc. if insufficient inputs are provided, the backend will check on the client side and throw proper errors.
+
+**NOTE** the request will be made upon invokation of `backend.call()` and does not matter if you subscribe to the response object or not. If you subscribe after the server has responded, obviously you will miss out on the data.
